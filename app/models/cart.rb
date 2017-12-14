@@ -27,5 +27,6 @@ class Cart < ActiveRecord::Base
       item.update(inventory: new_inv)
     end
     self.update(status: "submitted")
+    self.user.update(current_cart_id: nil)
   end
 end
