@@ -6,4 +6,8 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
+   def find_or_create_current_cart
+     self.current_cart ||= Cart.create(user_id: self.id)
+   end
+
 end
