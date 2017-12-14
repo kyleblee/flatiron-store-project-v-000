@@ -4,7 +4,10 @@ class Cart < ActiveRecord::Base
   belongs_to :user
 
   def total
-    items.sum(:price)
+    line_items.inject(0) do |sum, line_item|
+      line_price = line_item.item.price * line_item.quantity
+      sum + line_price
+    end
   end
 
   def add_item(item_id)
@@ -13,7 +16,16 @@ class Cart < ActiveRecord::Base
       existing_line_item.update(quantity: new_quantity)
       existing_line_item
     else
-      LineItem.new(item_id: item_id, cart_id: self.id)
+      line_item = LineItem.new(item_id: item_id, cart_id: self.id)
     end
+  end
+
+  def checkout
+    self.line_items.each do |line_item|
+      item = Item.find_by(id: line_item.item_id)
+      new_inv = item.inventory - line_item.quantity
+      item.update(inventory: new_inv)
+    end
+    self.update(status: "submitted")
   end
 end
